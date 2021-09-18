@@ -10,8 +10,8 @@
     ]
   },
   "dependencies": {
-    "@web3api/client-js": "0.0.1-prealpha.40",
-    "@web3api/react": "0.0.1-prealpha.40",
+    "@web3api/client-js": "0.0.1-prealpha.44",
+    "@web3api/react": "0.0.1-prealpha.44",
     "http-proxy": "1.18.1",
     "http-proxy-middleware": "1.0.6",
     "react": "16.13.1",

@@ -14,7 +14,7 @@ export function setupWeb3ApiClient(options: Web3APiOptions): Web3ApiClient {
       uri: "w3://ens/ethereum.web3api.eth",
       plugin: ethereumPlugin({
         networks: {
-          rinkeby: {
+          mainnet: {
             provider: options.ethersProvider,
           },
         },
