@@ -17,6 +17,7 @@ import {
   Td,
 } from '@chakra-ui/react';
 import { Nav } from './Nav';
+import { Token } from './components/Token';
 
 interface TokenBalance {
   contract_decimals: number;
@@ -119,10 +120,7 @@ export const HelloWorld: React.FC = () => {
           <Tbody>
             {accountBalance &&
               accountBalance.items.map((token: TokenBalance, i) => (
-                <Tr>
-                  <Td> {token.contract_ticker_symbol} </Td>
-                  <Td> {token.balance / 10 ** token.contract_decimals} </Td>
-                </Tr>
+                <Token key={i} index={i} token={token}/>
               ))}
           </Tbody>
         </Table>

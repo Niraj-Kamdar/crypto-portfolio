@@ -2,6 +2,11 @@ import { useWeb3ApiQuery, createWeb3ApiProvider } from "@web3api/react";
 // import { Web3ApiClient } from "@web3api/client-js";
 import React, { useEffect, useState } from "react";
 import { TokenProps } from "../interfaces";
+import {
+  Tr,
+  Th,
+  Td,
+} from '@chakra-ui/react';
 // import { setupWeb3ApiClient } from "../setupClient";
 
 export const Token: React.FC<TokenProps> = ({index, token}) => {
@@ -39,19 +44,9 @@ export const Token: React.FC<TokenProps> = ({index, token}) => {
   
 
   return (
-    <div>
-    <table> 
-      <tbody>
-        <tr>
-        {
-          index ===0 ? <th> Token </th> : <td> {token.contract_ticker_symbol} </td>
-        }
-        {
-          index ===0 ? <th> Balance </th> : <td> {token.balance / (10 ** token.contract_decimals) } </td>
-        }
-        </tr>
-      </tbody>
-    </table>
-    </div>
+    <Tr>
+      <Td> {token.contract_ticker_symbol} </Td>
+      <Td> {token.balance / 10 ** token.contract_decimals} </Td>
+    </Tr>
   )
 }
