@@ -2,12 +2,12 @@ import React from 'react';
 import { useWeb3ApiQuery } from '@web3api/react';
 import { CHAIN_ID, COVALENT_API, COVALENT_API_KEY } from './config';
 import {
+  useColorMode,
   Flex,
   Box,
   FormControl,
   FormLabel,
   Input,
-  Heading,
   Button,
   Table,
   Thead,
@@ -16,8 +16,9 @@ import {
   Th,
   Td,
 } from '@chakra-ui/react';
-import { Nav } from './Nav';
 import { Token } from './components/Token';
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import PieChart from './components/PieChart';
 
 interface TokenBalance {
   contract_decimals: number;
@@ -58,6 +59,7 @@ export const HelloWorld: React.FC = () => {
   const [accountBalance, setAccountBalance] = React.useState<
     AccountBalance | undefined
   >(undefined);
+  const { colorMode, toggleColorMode } = useColorMode();
 
   const query = {
     uri: 'w3://ens/http.web3api.eth',
@@ -96,34 +98,54 @@ export const HelloWorld: React.FC = () => {
 
   return (
     <>
-      <Nav />
       <Box p={10}>
-        <Heading mb={15}>Portfolio Tracker</Heading>
-        <FormControl id='email'>
-          <FormLabel>Wallet address</FormLabel>
-          <Flex maxW={'33rem'}>
-            <Input mb={5} mr={5} onChange={(event) => onChangeHandler(event)} />
-            <Button onClick={logMsgHandler} colorScheme='teal'>
-              Submit
+        <FormControl>
+          <Flex justify='center'>
+            <Flex w='100%'>
+              <Input
+                mb={5}
+                mr={5}
+                w='60%'
+                placeholder='Wallet Address'
+                onChange={(event) => onChangeHandler(event)}
+              />
+              <Button mr={5} onClick={logMsgHandler} colorScheme='facebook'>
+                Submit
+              </Button>
+            </Flex>
+            <Button onClick={toggleColorMode}>
+              {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
             </Button>
+          </Flex>
+          <Flex justify='center' maxW='100%'>
+            <PieChart height={200} width={255} />
           </Flex>
         </FormControl>
         <br />
 
-        <Table maxW='80%' variant='striped' colorScheme='teal'>
-          <Thead>
-            <Tr>
-              <Th>Token</Th>
-              <Th>Balance</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {accountBalance &&
-              accountBalance.items.map((token: TokenBalance, i) => (
-                <Token key={i} index={i} token={token}/>
-              ))}
-          </Tbody>
-        </Table>
+        <Flex justify='center'>
+          <Table
+            border='2px solid transparent'
+            borderRadius='1rem'
+            boxShadow='0 5px 4px 0 rgba(0, 0, 0, .3)'
+            maxW='80%'
+            variant='striped'
+            colorScheme='facebook'
+          >
+            <Thead>
+              <Tr>
+                <Th>Token</Th>
+                <Th>Balance</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {accountBalance &&
+                accountBalance.items.map((token: TokenBalance, i) => (
+                  <Token key={i} index={i} token={token} />
+                ))}
+            </Tbody>
+          </Table>
+        </Flex>
       </Box>
     </>
   );
