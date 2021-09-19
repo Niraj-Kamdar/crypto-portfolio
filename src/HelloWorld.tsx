@@ -109,7 +109,7 @@ export const HelloWorld: React.FC = () => {
                 placeholder='Wallet Address'
                 onChange={(event) => onChangeHandler(event)}
               />
-              <Button mr={5} onClick={logMsgHandler} colorScheme='facebook'>
+              <Button mr={5} onClick={logMsgHandler} colorScheme='blue'>
                 Submit
               </Button>
             </Flex>
@@ -117,21 +117,14 @@ export const HelloWorld: React.FC = () => {
               {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
             </Button>
           </Flex>
-          <Flex justify='center' maxW='100%'>
+          <Flex justify='flex-start' maxW='100%'>
             <PieChart height={200} width={255} />
           </Flex>
         </FormControl>
         <br />
 
-        <Flex justify='center'>
-          <Table
-            border='2px solid transparent'
-            borderRadius='1rem'
-            boxShadow='0 5px 4px 0 rgba(0, 0, 0, .3)'
-            maxW='80%'
-            variant='striped'
-            colorScheme='facebook'
-          >
+        <Flex justify='flex-start'>
+          <Table maxW='80%' variant='simple'>
             <Thead>
               <Tr>
                 <Th>Token</Th>
