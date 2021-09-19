@@ -1,12 +1,12 @@
 import React from 'react';
 import { Web3ApiProvider } from '@web3api/react';
-import { HelloWorld } from './HelloWorld';
+import { Home } from './Home';
 import Sidebar from './containers/Sidebar';
 
 export const App: React.FC = () => {
   return (
     <Web3ApiProvider>
-      <Sidebar children={HelloWorld} />
+      <Sidebar children={Home} />
     </Web3ApiProvider>
   );
 };

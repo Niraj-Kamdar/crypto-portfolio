@@ -26,7 +26,7 @@ import {
 } from 'react-icons/fi';
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
-import { HelloWorld } from '../HelloWorld';
+import { Home } from '../Home';
 import Logo from '../polywrap.png';
 import LogoHorizontal from '../polywrap_horizontal.png';
 import LogoBlack from '../polywrap_black.png';
@@ -68,7 +68,7 @@ export default function SimpleSidebar({ children }: { children: ReactNode }) {
       {/* mobilenav */}
       <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
       <Box ml={{ base: 0, md: 60 }} p='4'>
-        <HelloWorld />
+        <Home />
         {children}
       </Box>
     </Box>
