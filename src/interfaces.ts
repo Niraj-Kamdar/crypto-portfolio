@@ -46,10 +46,51 @@ export interface Token {
 
 export interface TokenComponentsList {
   token: Token;
+  type: TokenProtocolType;
   underlyingTokenComponents: TokenComponent[];
 }
 
 export interface TokenProps {
   index: number;
   token: CovalentTokenBalance;
+}
+
+export enum TokenProtocolType {
+  Native,
+  YearnV1,
+  YearnV2,
+  CurveGauge,
+  Curve,
+  AaveV1,
+  AaveV2,
+  AaveAMM,
+  UniswapV2,
+  UniswapV3,
+  Sushiswap,
+  Linkswap,
+  Compound,
+  Sushibar,
+  Cream
+}
+
+export interface GetComponents {
+  token: Token;
+  type: TokenProtocolType;
+  underlyingTokenComponents: TokenComponent[];
+}
+
+export interface DefiSDKData {
+  getComponents: GetComponents;
+}
+
+export interface DefiSDKResponse {
+  data: DefiSDKData | undefined;
+  errors: string[] | undefined;
+}
+
+export interface TokenBalance {
+  token: Token;
+  amount: number;
+  price: number;
+  value: number;
 }
