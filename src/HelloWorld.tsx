@@ -133,9 +133,11 @@ export const HelloWorld: React.FC = () => {
             </Thead>
             <Tbody>
               {accountBalance &&
-                accountBalance.items.map((token: TokenBalance, i) => (
-                  <Token key={i} index={i} token={token} />
-                ))}
+                accountBalance.items.map((token: TokenBalance, i) =>
+                  Math.round(token.balance) === 0 ? null : (
+                    <Token key={i} index={i} token={token} />
+                  )
+                )}
             </Tbody>
           </Table>
         </Flex>
