@@ -1,30 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Pie, { ProvidedProps, PieArcDatum } from '@visx/shape/lib/shapes/Pie';
 import { scaleOrdinal } from '@visx/scale';
 import { Group } from '@visx/group';
+import { Text } from '@visx/text';
 import { GradientTealBlue } from '@visx/gradient';
 import letterFrequency, {
   LetterFrequency,
 } from '@visx/mock-data/lib/mocks/letterFrequency';
 import { animated, useTransition, interpolate } from 'react-spring';
+import { useTokenContext } from '../utils/context/tokenContext';
+import { TokenBalance } from '../interfaces';
+import { sum } from 'lodash';
 
 // data and types
-
-const letters: LetterFrequency[] = letterFrequency.slice(0, 4);
-
-// accessor functions
-const frequency = (d: LetterFrequency) => d.frequency;
-
-// color scales
-const getLetterFrequencyColor = scaleOrdinal({
-  domain: letters.map((l) => l.letter),
-  range: [
-    'rgba(255,255,255,0.7)',
-    'rgba(255,255,255,0.6)',
-    'rgba(255,255,255,0.5)',
-    'rgba(255,255,255,0.4)',
-  ],
-});
 
 const defaultMargin = { top: 20, right: 20, bottom: 20, left: 20 };
 
@@ -41,9 +29,37 @@ export default function PieChart({
   margin = defaultMargin,
   animate = true,
 }: PieProps) {
-  const [selectedAlphabetLetter, setSelectedAlphabetLetter] = useState<
-    string | null
-  >(null);
+  const [selectedToken, setSelectedToken] = useState<string | null>(null);
+  const { tokens } = useTokenContext();
+
+  // accessor functions
+  const frequency = (d: TokenBalance) => d.percentOfTotal || 0;
+
+  // color scales
+  const getTokenFrequencyColor = scaleOrdinal({
+    domain: tokens?.map((l) => l.value),
+    range: [
+      'rgba(255, 255, 255, 0.7)',
+      'rgba(255, 255, 255, 0.6)',
+      'rgba(255, 255, 255, 0.5)',
+      'rgba(255, 255, 255, 0.4)',
+      'rgba(255, 255, 255, 0.3)',
+      'rgba(255, 255, 255, 0.2)',
+      'rgba(255, 255, 255, 0.1)',
+    ],
+  });
+
+  useEffect(() => {
+    let s = 0;
+    console.log(tokens);
+    if (tokens) {
+      tokens.length > 0 &&
+        tokens.map((token) => {
+          s += token.value;
+          token.percentOfTotal = (token.value / s) * 100;
+        });
+    }
+  }, [tokens]);
 
   if (width < 10) return null;
 
@@ -52,7 +68,7 @@ export default function PieChart({
   const radius = Math.min(innerWidth, innerHeight) * 0.8;
   const centerY = innerHeight / 2;
   const centerX = innerWidth / 2;
-  const donutThickness = 50;
+  const donutThickness = 35;
 
   return (
     <svg width={width} height={height}>
@@ -65,32 +81,24 @@ export default function PieChart({
       />
       <Group top={centerY + margin.top} left={centerX + margin.left}>
         <Pie
-          data={
-            selectedAlphabetLetter
-              ? letters.filter(
-                  ({ letter }) => letter === selectedAlphabetLetter,
-                )
-              : letters
-          }
+          data={tokens}
           pieValue={frequency}
           pieSortValues={() => -1}
-          outerRadius={radius - donutThickness * 1.3}
+          outerRadius={radius - donutThickness}
         >
           {(pie) => (
-            <AnimatedPie<LetterFrequency>
+            <AnimatedPie<TokenBalance>
               {...pie}
               animate={animate}
-              getKey={({ data: { letter } }) => letter}
-              onClickDatum={({ data: { letter } }) =>
+              getKey={({ data: { token } }) => token.symbol}
+              onClickDatum={({ data: { token } }) =>
                 animate &&
-                setSelectedAlphabetLetter(
-                  selectedAlphabetLetter && selectedAlphabetLetter === letter
-                    ? null
-                    : letter,
+                setSelectedToken(
+                  selectedToken && selectedToken === token.symbol ? null : '',
                 )
               }
-              getColor={({ data: { letter } }) =>
-                getLetterFrequencyColor(letter)
+              getColor={({ data: { percentOfTotal } }) =>
+                getTokenFrequencyColor(percentOfTotal || 0)
               }
             />
           )}
