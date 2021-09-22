@@ -26,6 +26,7 @@ import {
 } from "./interfaces";
 import { coingeckoQuery, covalentQuery, defiSDKQuery } from "./queries";
 import { CHAIN_ID, CHAIN_NAME, COINGECKO_API, COVALENT_API } from "./config";
+import { useTokenContext } from "./utils/context/tokenContext";
 
 export const Home: React.FC = () => {
   const [accountAddress, setAccountAddress] = React.useState<string>("");
@@ -38,6 +39,8 @@ export const Home: React.FC = () => {
   >();
   const { colorMode, toggleColorMode } = useColorMode();
   const w3Client = useWeb3ApiClient();
+
+  const { setTokens } = useTokenContext();
 
   const logMsgHandler = async (): Promise<any> => {
     setSubmitted(true);
@@ -114,6 +117,7 @@ export const Home: React.FC = () => {
         const results = await Promise.all(promises)
         const tokenBalances = results.filter((token) => (token && token.value)) as TokenBalance[];
         setTokenBalances(tokenBalances);
+        setTokens(tokenBalances)
       }
     };
     fetch();
@@ -157,7 +161,7 @@ export const Home: React.FC = () => {
                 <Th>Token</Th>
                 <Th>Amount</Th>
                 <Th>Price</Th>
-                <Th>Amount</Th>
+                <Th>Value</Th>
               </Tr>
             </Thead>
             <Tbody>

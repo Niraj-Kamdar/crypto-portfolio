@@ -93,4 +93,5 @@ export interface TokenBalance {
   amount: number;
   price: number;
   value: number;
+  percentOfTotal?: number;
 }
