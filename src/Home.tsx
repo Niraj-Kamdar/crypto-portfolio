@@ -13,9 +13,9 @@ import {
   Tr,
   Th,
   Td,
-} from '@chakra-ui/react';
-import { MoonIcon, SunIcon } from '@chakra-ui/icons';
-import PieChart from './components/PieChart';
+} from "@chakra-ui/react";
+import { MoonIcon, SunIcon } from "@chakra-ui/icons";
+import PieChart from "./components/PieChart/PieChart";
 import {
   CovalentAccountBalance,
   CovalentResponse,
@@ -163,7 +163,7 @@ export const Home: React.FC = () => {
             </Button>
           </Flex>
           <Flex justify="flex-start" maxW="100%">
-            <PieChart height={200} width={255} />
+            <PieChart />
           </Flex>
         </FormControl>
         <br />
