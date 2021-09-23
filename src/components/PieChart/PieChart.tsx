@@ -48,27 +48,28 @@ export default function PieChart() {
 
   return (
     <Wrapper>
-    {tokens ?
-    <ResponsivePie
-        data={tokenList}
-        margin={{ top: 20, right: 40, bottom: 40, left: 40 }}
-        padAngle={0.7}
-        cornerRadius={3}
-        activeOuterRadiusOffset={8}
-        colors={{ datum: `data.color`}}
-        borderWidth={1}
-        borderColor={{ from: 'color', modifiers: [ [ 'darker', 0.2 ] ] }}
-        enableArcLinkLabels={false}
-        arcLabel={d=>`${d.id} (${d.value})`}
-        arcLinkLabelsSkipAngle={10}
-        arcLinkLabelsTextColor={{from: 'color', modifiers: [ [ 'darker', 2] ] }}
-        arcLinkLabelsThickness={2}
-        arcLinkLabelsColor={{ from: 'color', modifiers: [ [ 'darker', 2 ] ] }}
-        arcLabelsSkipAngle={10}
-        arcLabelsTextColor='black'
-    /> :
-      <P>Enter a wallet address, or sign in.</P>
-    }
+      {tokens ? (
+        <ResponsivePie
+          data={tokenList}
+          margin={{ top: 20, right: 40, bottom: 40, left: 40 }}
+          padAngle={0.7}
+          cornerRadius={3}
+          activeOuterRadiusOffset={8}
+          colors={{ datum: `data.color` }}
+          borderWidth={1}
+          borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
+          enableArcLinkLabels={false}
+          arcLabel={(d: any) => `${d.id} (${d.value})`}
+          arcLinkLabelsSkipAngle={10}
+          arcLinkLabelsTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
+          arcLinkLabelsThickness={2}
+          arcLinkLabelsColor={{ from: 'color', modifiers: [['darker', 2]] }}
+          arcLabelsSkipAngle={10}
+          arcLabelsTextColor="black"
+        />
+      ) : (
+        <P>Enter a wallet address, or sign in.</P>
+      )}
     </Wrapper>
 
   );
