@@ -35,7 +35,6 @@
     "@types/react-lottie": "1.2.5",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.31.2",
-    "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-node": "^11.1.0",
@@ -92,5 +91,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "resolutions": {
+    "eslint": "7.32.0"
   }
 }
