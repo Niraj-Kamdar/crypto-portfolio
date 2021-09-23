@@ -5,7 +5,6 @@ import {
   Flex,
   Box,
   FormControl,
-  FormLabel,
   Input,
   Button,
   Table,
@@ -63,63 +62,50 @@ export const Home: React.FC = () => {
       }
     };
     fetch();
-  }, [submitted, accountAddress]);
+  }, [submitted, accountAddress, w3Client]);
 
-  async function fetchTokenBalance(
-    covalentTokenBalance: CovalentTokenBalance,
-  ): Promise<TokenBalance | undefined> {
-    defiSDKQuery.variables.address = covalentTokenBalance.contract_address;
-    const result: DefiSDKResponse = (await w3Client.query(
-      defiSDKQuery,
-    )) as DefiSDKResponse;
-    if (result.errors) {
-      console.error(result.errors);
-    } else {
-      if (result.data?.getComponents) {
-        const getComponents = result.data.getComponents;
-        if (getComponents.underlyingTokenComponents.length !== 0) {
-          for (let underlyingTC of getComponents.underlyingTokenComponents) {
-            coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${underlyingTC.token.address}`;
+  useEffect(() => {
+    async function fetchTokenBalance(covalentTokenBalance: CovalentTokenBalance): Promise<TokenBalance | undefined> {
+      defiSDKQuery.variables.address = covalentTokenBalance.contract_address;
+      const result: DefiSDKResponse = (await w3Client.query(
+        defiSDKQuery
+      )) as DefiSDKResponse;
+      if (result.errors) {
+        console.error(result.errors);
+      } else {
+        if (result.data?.getComponents) {
+          const getComponents = result.data.getComponents;
+          if (getComponents.underlyingTokenComponents.length !== 0) {
+            for (let underlyingTC of getComponents.underlyingTokenComponents) {
+              coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${underlyingTC.token.address}`;
+              const cgResult = await w3Client.query(coingeckoQuery);
+              console.log(cgResult);
+            }
+          } else {
+            coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${getComponents.token.address}`;
             const cgResult = await w3Client.query(coingeckoQuery);
-            console.log(cgResult);
-          }
-        } else {
-          coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${getComponents.token.address}`;
-          const cgResult = await w3Client.query(coingeckoQuery);
-          if (cgResult && cgResult.data && cgResult.data?.get) {
-            const response: Record<string, string> = cgResult.data
-              .get as Record<string, string>;
-            const parsedResponse = JSON.parse(response['body']) as Record<
-              string,
-              unknown
-            >;
-            const marketData = parsedResponse['market_data'] as Record<
-              string,
-              unknown
-            >;
-            const currentPrice = marketData['current_price'] as Record<
-              string,
-              number
-            >;
-            const usdPrice = currentPrice['usd'];
-            const amount =
-              covalentTokenBalance.balance /
-              10 ** covalentTokenBalance.contract_decimals;
-            const tokenBalance: TokenBalance = {
-              token: getComponents.token,
-              amount: amount,
-              price: usdPrice,
-              value: amount * usdPrice,
-            };
-            console.log(tokenBalance);
-            return tokenBalance;
+            if (cgResult && cgResult.data && cgResult.data?.get) {
+              const response: Record<string, string> = cgResult.data
+                .get as Record<string, string>;
+              const parsedResponse = JSON.parse(response["body"]) as Record<string, unknown>;
+              const marketData = parsedResponse["market_data"] as Record<string, unknown>;
+              const currentPrice = marketData["current_price"] as Record<string, number>;
+              const usdPrice = currentPrice["usd"];
+              const amount = (covalentTokenBalance.balance / 10 ** covalentTokenBalance.contract_decimals);
+              const tokenBalance: TokenBalance = {
+                token: getComponents.token,
+                amount: amount,
+                price: usdPrice,
+                value: amount * usdPrice
+              }
+              console.log(tokenBalance);
+              return tokenBalance;
+            }
           }
         }
       }
     }
-  }
 
-  useEffect(() => {
     const fetch = async () => {
       if (accountBalance?.items) {
         const promises = accountBalance.items.map(fetchTokenBalance);
@@ -132,7 +118,7 @@ export const Home: React.FC = () => {
       }
     };
     fetch();
-  }, [accountBalance]);
+  }, [accountBalance, w3Client]);
 
   const onChangeHandler = (event: any): void => {
     setAccountAddress(event?.target.value);
