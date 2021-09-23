@@ -1,27 +1,27 @@
 export interface CovalentTokenBalance {
-  contract_decimals: number,
-  contract_name: string,
-  contract_ticker_symbol: string,
-  contract_address: string,
-  supports_erc: string[],
-  logo_url: string,
-  type: string,
-  balance: number,
-  balance_24h: number,
-  quote_rate: number,
-  quote_rate_24h: number,
-  quote: number,
-  quote_24h: number,
-  nft_data: unknown | null
+  contract_decimals: number;
+  contract_name: string;
+  contract_ticker_symbol: string;
+  contract_address: string;
+  supports_erc: string[];
+  logo_url: string;
+  type: string;
+  balance: number;
+  balance_24h: number;
+  quote_rate: number;
+  quote_rate_24h: number;
+  quote: number;
+  quote_24h: number;
+  nft_data: unknown | null;
 }
 export interface CovalentAccountBalance {
-  address: string,
-  updated_at: string,
-  next_update_at: string,
-  quote_currency: string | null,
-  chain_id: number,
-  pagination: unknown | null
-  items: CovalentTokenBalance[]
+  address: string;
+  updated_at: string;
+  next_update_at: string;
+  quote_currency: string | null;
+  chain_id: number;
+  pagination: unknown | null;
+  items: CovalentTokenBalance[];
 }
 
 export interface CovalentResponse {
@@ -70,7 +70,7 @@ export enum TokenProtocolType {
   Linkswap,
   Compound,
   Sushibar,
-  Cream
+  Cream,
 }
 
 export interface GetComponents {

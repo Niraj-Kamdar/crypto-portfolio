@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { useWeb3ApiClient } from "@web3api/react";
+import React, { useEffect } from 'react';
+import { useWeb3ApiClient } from '@web3api/react';
 import {
   useColorMode,
   Flex,
@@ -14,21 +14,21 @@ import {
   Tr,
   Th,
   Td,
-} from "@chakra-ui/react";
-import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import PieChart from "./components/PieChart";
+} from '@chakra-ui/react';
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import PieChart from './components/PieChart';
 import {
   CovalentAccountBalance,
   CovalentResponse,
   CovalentTokenBalance,
   DefiSDKResponse,
   TokenBalance,
-} from "./interfaces";
-import { coingeckoQuery, covalentQuery, defiSDKQuery } from "./queries";
-import { CHAIN_ID, CHAIN_NAME, COINGECKO_API, COVALENT_API } from "./config";
+} from './interfaces';
+import { coingeckoQuery, covalentQuery, defiSDKQuery } from './queries';
+import { CHAIN_ID, CHAIN_NAME, COINGECKO_API, COVALENT_API } from './config';
 
 export const Home: React.FC = () => {
-  const [accountAddress, setAccountAddress] = React.useState<string>("");
+  const [accountAddress, setAccountAddress] = React.useState<string>('');
   const [submitted, setSubmitted] = React.useState<boolean>(false);
   const [accountBalance, setAccountBalance] = React.useState<
     CovalentAccountBalance | undefined
@@ -54,7 +54,7 @@ export const Home: React.FC = () => {
             string
           >;
           const covalentResponse = JSON.parse(
-            response["body"]
+            response['body'],
           ) as CovalentResponse;
           setAccountBalance(covalentResponse.data);
           console.log(covalentResponse.data);
@@ -65,10 +65,12 @@ export const Home: React.FC = () => {
     fetch();
   }, [submitted, accountAddress]);
 
-  async function fetchTokenBalance(covalentTokenBalance: CovalentTokenBalance): Promise<TokenBalance | undefined> {
+  async function fetchTokenBalance(
+    covalentTokenBalance: CovalentTokenBalance,
+  ): Promise<TokenBalance | undefined> {
     defiSDKQuery.variables.address = covalentTokenBalance.contract_address;
     const result: DefiSDKResponse = (await w3Client.query(
-      defiSDKQuery
+      defiSDKQuery,
     )) as DefiSDKResponse;
     if (result.errors) {
       console.error(result.errors);
@@ -87,17 +89,28 @@ export const Home: React.FC = () => {
           if (cgResult && cgResult.data && cgResult.data?.get) {
             const response: Record<string, string> = cgResult.data
               .get as Record<string, string>;
-            const parsedResponse = JSON.parse(response["body"]) as Record<string, unknown>;
-            const marketData = parsedResponse["market_data"] as Record<string, unknown>;
-            const currentPrice = marketData["current_price"] as Record<string, number>;
-            const usdPrice = currentPrice["usd"];
-            const amount = (covalentTokenBalance.balance / 10 ** covalentTokenBalance.contract_decimals);
+            const parsedResponse = JSON.parse(response['body']) as Record<
+              string,
+              unknown
+            >;
+            const marketData = parsedResponse['market_data'] as Record<
+              string,
+              unknown
+            >;
+            const currentPrice = marketData['current_price'] as Record<
+              string,
+              number
+            >;
+            const usdPrice = currentPrice['usd'];
+            const amount =
+              covalentTokenBalance.balance /
+              10 ** covalentTokenBalance.contract_decimals;
             const tokenBalance: TokenBalance = {
               token: getComponents.token,
               amount: amount,
               price: usdPrice,
-              value: amount * usdPrice
-            }
+              value: amount * usdPrice,
+            };
             console.log(tokenBalance);
             return tokenBalance;
           }
@@ -111,8 +124,10 @@ export const Home: React.FC = () => {
       if (accountBalance?.items) {
         const promises = accountBalance.items.map(fetchTokenBalance);
         console.log(promises);
-        const results = await Promise.all(promises)
-        const tokenBalances = results.filter((token) => (token && token.value)) as TokenBalance[];
+        const results = await Promise.all(promises);
+        const tokenBalances = results.filter(
+          (token) => token && token.value,
+        ) as TokenBalance[];
         setTokenBalances(tokenBalances);
       }
     };
@@ -141,7 +156,7 @@ export const Home: React.FC = () => {
               </Button>
             </Flex>
             <Button onClick={toggleColorMode}>
-              {colorMode === "light" ? <MoonIcon /> : <SunIcon />}
+              {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
             </Button>
           </Flex>
           <Flex justify="flex-start" maxW="100%">

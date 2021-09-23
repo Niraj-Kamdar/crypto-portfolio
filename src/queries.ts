@@ -1,4 +1,4 @@
-import { COVALENT_API_KEY } from "./config";
+import { COVALENT_API_KEY } from './config';
 
 export const covalentQuery = {
   uri: 'w3://ens/http.web3api.eth',
@@ -14,8 +14,8 @@ export const covalentQuery = {
     }
   `,
   variables: {
-    url: "",
-  }
+    url: '',
+  },
 };
 
 export const defiSDKQuery = {
@@ -29,7 +29,7 @@ export const defiSDKQuery = {
     }
   `,
   variables: {
-    address: "",
+    address: '',
     connection: {
       node: null,
       networkNameOrChainId: 'MAINNET',
@@ -51,6 +51,6 @@ export const coingeckoQuery = {
     }
   `,
   variables: {
-    url: "",
-  }
+    url: '',
+  },
 };
