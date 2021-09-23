@@ -56,7 +56,7 @@ export default function PieChart({
 
   return (
     <svg width={width} height={height}>
-      <GradientTealBlue id='visx-pie-gradient' />
+      <GradientTealBlue id="visx-pie-gradient" />
       <rect
         rx={14}
         width={width}
@@ -68,7 +68,7 @@ export default function PieChart({
           data={
             selectedAlphabetLetter
               ? letters.filter(
-                  ({ letter }) => letter === selectedAlphabetLetter
+                  ({ letter }) => letter === selectedAlphabetLetter,
                 )
               : letters
           }
@@ -86,7 +86,7 @@ export default function PieChart({
                 setSelectedAlphabetLetter(
                   selectedAlphabetLetter && selectedAlphabetLetter === letter
                     ? null
-                    : letter
+                    : letter,
                 )
               }
               getColor={({ data: { letter } }) =>
@@ -98,13 +98,13 @@ export default function PieChart({
       </Group>
       {animate && (
         <text
-          textAnchor='end'
+          textAnchor="end"
           x={width - 16}
           y={height - 16}
-          fill='white'
+          fill="white"
           fontSize={11}
           fontWeight={300}
-          pointerEvents='none'
+          pointerEvents="none"
         >
           Click segments to update
         </text>
@@ -166,7 +166,7 @@ function AnimatedPie<Datum>({
                 ...arc,
                 startAngle,
                 endAngle,
-              })
+              }),
           )}
           fill={getColor(arc)}
           onClick={() => onClickDatum(arc)}
@@ -175,13 +175,13 @@ function AnimatedPie<Datum>({
         {hasSpaceForLabel && (
           <animated.g style={{ opacity: props.opacity }}>
             <text
-              fill='black'
+              fill="black"
               x={centroidX}
               y={centroidY}
-              dy='.63em'
+              dy=".63em"
               fontSize={11}
-              textAnchor='middle'
-              pointerEvents='none'
+              textAnchor="middle"
+              pointerEvents="none"
             >
               {getKey(arc)}
             </text>
