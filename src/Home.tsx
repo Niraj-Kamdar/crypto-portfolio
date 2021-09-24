@@ -65,10 +65,12 @@ export const Home: React.FC = () => {
   }, [submitted, accountAddress, w3Client]);
 
   useEffect(() => {
-    async function fetchTokenBalance(covalentTokenBalance: CovalentTokenBalance): Promise<TokenBalance | undefined> {
+    async function fetchTokenBalance(
+      covalentTokenBalance: CovalentTokenBalance,
+    ): Promise<TokenBalance | undefined> {
       defiSDKQuery.variables.address = covalentTokenBalance.contract_address;
       const result: DefiSDKResponse = (await w3Client.query(
-        defiSDKQuery
+        defiSDKQuery,
       )) as DefiSDKResponse;
       if (result.errors) {
         console.error(result.errors);
@@ -87,17 +89,28 @@ export const Home: React.FC = () => {
             if (cgResult && cgResult.data && cgResult.data?.get) {
               const response: Record<string, string> = cgResult.data
                 .get as Record<string, string>;
-              const parsedResponse = JSON.parse(response["body"]) as Record<string, unknown>;
-              const marketData = parsedResponse["market_data"] as Record<string, unknown>;
-              const currentPrice = marketData["current_price"] as Record<string, number>;
-              const usdPrice = currentPrice["usd"];
-              const amount = (covalentTokenBalance.balance / 10 ** covalentTokenBalance.contract_decimals);
+              const parsedResponse = JSON.parse(response['body']) as Record<
+                string,
+                unknown
+              >;
+              const marketData = parsedResponse['market_data'] as Record<
+                string,
+                unknown
+              >;
+              const currentPrice = marketData['current_price'] as Record<
+                string,
+                number
+              >;
+              const usdPrice = currentPrice['usd'];
+              const amount =
+                covalentTokenBalance.balance /
+                10 ** covalentTokenBalance.contract_decimals;
               const tokenBalance: TokenBalance = {
                 token: getComponents.token,
                 amount: amount,
                 price: usdPrice,
-                value: amount * usdPrice
-              }
+                value: amount * usdPrice,
+              };
               console.log(tokenBalance);
               return tokenBalance;
             }
@@ -158,7 +171,7 @@ export const Home: React.FC = () => {
                 <Th>Token</Th>
                 <Th>Amount</Th>
                 <Th>Price</Th>
-                <Th>Amount</Th>
+                <Th>Value</Th>
               </Tr>
             </Thead>
             <Tbody>
