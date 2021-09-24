@@ -27,10 +27,10 @@ import {
 import { IconType } from 'react-icons';
 import { ReactText } from 'react';
 import { Home } from '../Home';
-import Logo from '../polywrap.png';
-import LogoHorizontal from '../polywrap_horizontal.png';
-import LogoBlack from '../polywrap_black.png';
-import LogoHorizontalBlack from '../polywrap_horizontal_black.png';
+import Logo from '../assets/polywrap.png';
+import LogoHorizontal from '../assets/polywrap_horizontal.png';
+import LogoBlack from '../assets/polywrap_black.png';
+import LogoHorizontalBlack from '../assets/polywrap_horizontal_black.png';
 
 interface LinkItemProps {
   name: string;
