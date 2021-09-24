@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
+import { injected } from './web3';
 import { useWeb3ApiClient } from '@web3api/react';
 import {
   useColorMode,
   Flex,
   Box,
   FormControl,
-  FormLabel,
   Input,
   Button,
   Table,
@@ -26,10 +26,14 @@ import {
 } from './interfaces';
 import { coingeckoQuery, covalentQuery, defiSDKQuery } from './queries';
 import { CHAIN_ID, CHAIN_NAME, COINGECKO_API, COVALENT_API } from './config';
+import { useWeb3React } from '@web3-react/core';
 
 export const Home: React.FC = () => {
-  const [accountAddress, setAccountAddress] = React.useState<string>('');
+  const [accountAddress, setAccountAddress] = React.useState<
+    null | string | undefined
+  >('');
   const [submitted, setSubmitted] = React.useState<boolean>(false);
+  const [connected, setConnected] = React.useState<boolean>(false);
   const [accountBalance, setAccountBalance] = React.useState<
     CovalentAccountBalance | undefined
   >(undefined);
@@ -38,14 +42,21 @@ export const Home: React.FC = () => {
   >();
   const { colorMode, toggleColorMode } = useColorMode();
   const w3Client = useWeb3ApiClient();
+  const { active, activate, account, deactivate } = useWeb3React();
 
   const logMsgHandler = async (): Promise<any> => {
     setSubmitted(true);
   };
 
+  // Need help setting account from connected wallet
+  const setConnectHandler = async (): Promise<any> => {
+    setAccountAddress(account);
+    setConnected(true);
+  };
+
   useEffect(() => {
     const fetch = async () => {
-      if (submitted) {
+      if (submitted || connected) {
         covalentQuery.variables.url = `${COVALENT_API}/v1/${CHAIN_ID}/address/${accountAddress}/balances_v2/`;
         const result = await w3Client.query(covalentQuery);
         if (result && result.data && result.data?.get) {
@@ -60,10 +71,11 @@ export const Home: React.FC = () => {
           console.log(covalentResponse.data);
         }
         setSubmitted(false);
+        setConnected(false);
       }
     };
     fetch();
-  }, [submitted, accountAddress]);
+  }, [submitted, connected, accountAddress]);
 
   async function fetchTokenBalance(
     covalentTokenBalance: CovalentTokenBalance,
@@ -151,22 +163,48 @@ export const Home: React.FC = () => {
                 placeholder="Wallet Address"
                 onChange={(event) => onChangeHandler(event)}
               />
-              <Button mr={5} onClick={logMsgHandler} colorScheme="blue">
+              <Button
+                borderRadius="15px"
+                mr={5}
+                onClick={logMsgHandler}
+                bgColor="transparent"
+              >
                 Submit
               </Button>
             </Flex>
-            <Button onClick={toggleColorMode}>
+            <Button mr={5} onClick={toggleColorMode}>
               {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
             </Button>
+            {active ? (
+              <Button
+                borderRadius="15px"
+                bgColor="transparent"
+                onClick={() => deactivate()}
+              >
+                ✅ {account?.substr(0, 6)}...
+              </Button>
+            ) : (
+              <Button
+                fontSize="inherit"
+                borderRadius="15px"
+                onClick={() => {
+                  activate(injected, undefined, true)
+                    .then(setConnectHandler)
+                    .catch((e) => console.log(e));
+                }}
+              >
+                Connect
+              </Button>
+            )}
           </Flex>
-          <Flex justify="flex-start" maxW="100%">
+          <Flex justify="center">
             <PieChart height={200} width={255} />
           </Flex>
         </FormControl>
         <br />
 
         <Flex justify="flex-start">
-          <Table maxW="80%" variant="simple">
+          <Table variant="striped">
             <Thead>
               <Tr>
                 <Th>Token</Th>
@@ -180,9 +218,9 @@ export const Home: React.FC = () => {
                 tokenBalances.map((token: TokenBalance, i) => (
                   <Tr key={i}>
                     <Td> {token.token.symbol} </Td>
-                    <Td>{token.amount.toFixed(4)}</Td>
-                    <Td>{token.price.toFixed(4)}</Td>
-                    <Td>{token.value.toFixed(4)}</Td>
+                    <Td>{token.amount.toLocaleString()}</Td>
+                    <Td>{token.price.toLocaleString()}</Td>
+                    <Td>{token.value.toLocaleString()}</Td>
                   </Tr>
                 ))}
             </Tbody>
