@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useTokenContext } from '../../utils/context/tokenContext';
 import { ResponsivePie } from '@nivo/pie';
-import {
-  Wrapper,
-  P
-} from './Style';
-
+import { Wrapper, P } from './Style';
 
 export default function PieChart() {
   const [tokenList, setTokenList] = useState<any>([]);
   const { tokens } = useTokenContext();
-
 
   const colorRange = [
     'rgba(255, 255, 255, 0.7)',
@@ -19,32 +14,33 @@ export default function PieChart() {
     'rgba(255, 255, 255, 0.4)',
     'rgba(255, 255, 255, 0.3)',
     'rgba(255, 255, 255, 0.2)',
-    'rgba(255, 255, 255, 0.1)'
-  ]
+    'rgba(255, 255, 255, 0.1)',
+  ];
 
   useEffect(() => {
     let s = 0;
     console.log(tokens);
     if (tokens) {
-      tokens.length > 0 && tokens.map((token) => {
-          console.log(token)
-          let list = tokenList
+      tokens.length > 0 &&
+        tokens.map((token) => {
+          console.log(token);
+          let list = tokenList;
           s += token.value;
-          if (!list.includes({id: token.token.symbol})) {
+          if (!list.includes({ id: token.token.symbol })) {
             let dataSet = {
               id: token.token.symbol,
               label: token.token.symbol,
-              value: (Math.round(token.value * 100)/100).toFixed(2),
-              color: colorRange[Math.floor(Math.random()*colorRange.length)]
-            }
-            list.push(dataSet)
-            setTokenList(list)
-            console.log('Data Set: ***')
-            console.log(list)
-        }
-      })
+              value: (Math.round(token.value * 100) / 100).toFixed(2),
+              color: colorRange[Math.floor(Math.random() * colorRange.length)],
+            };
+            list.push(dataSet);
+            setTokenList(list);
+            console.log('Data Set: ***');
+            console.log(list);
+          }
+        });
     }
-  }, [tokens])
+  }, [tokens]);
 
   return (
     <Wrapper>
@@ -71,6 +67,5 @@ export default function PieChart() {
         <P>Enter a wallet address, or sign in.</P>
       )}
     </Wrapper>
-
   );
 }

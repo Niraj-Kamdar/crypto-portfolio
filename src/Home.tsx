@@ -13,9 +13,9 @@ import {
   Tr,
   Th,
   Td,
-} from "@chakra-ui/react";
-import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import PieChart from "./components/PieChart/PieChart";
+} from '@chakra-ui/react';
+import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import PieChart from './components/PieChart/PieChart';
 import {
   CovalentAccountBalance,
   CovalentResponse,

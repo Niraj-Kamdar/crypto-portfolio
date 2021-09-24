@@ -11,9 +11,9 @@ ReactDOM.render(
   <ChakraProvider theme={theme}>
     <ColorModeScript initialColorMode={theme.initialColorMode} />
     <TokenContextProvider>
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
     </TokenContextProvider>
   </ChakraProvider>,
   document.getElementById('root'),
