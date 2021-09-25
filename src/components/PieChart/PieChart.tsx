@@ -1,71 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { useTokenContext } from '../../utils/context/tokenContext';
-import { ResponsivePie } from '@nivo/pie';
+import { Pie } from 'react-chartjs-2';
+import { Chart } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { Wrapper, P } from './Style';
 
 export default function PieChart() {
-  const [tokenList, setTokenList] = useState<any>([]);
+  Chart.register(ChartDataLabels);
+  const [labels, setLabels] = useState<string[]>([]);
+  const [dataSet, setDataSet] = useState<number[]>([]);
   const { tokens } = useTokenContext();
 
-  const colorRange = [
-    'rgba(255, 255, 255, 0.7)',
-    'rgba(255, 255, 255, 0.6)',
-    'rgba(255, 255, 255, 0.5)',
-    'rgba(255, 255, 255, 0.4)',
-    'rgba(255, 255, 255, 0.3)',
-    'rgba(255, 255, 255, 0.2)',
-    'rgba(255, 255, 255, 0.1)',
-  ];
+  const data = {
+    labels: labels,
+    text: dataSet,
+    datasets: [
+      {
+        label: 'Total Value',
+        data: dataSet,
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.7)',
+          'rgba(255, 159, 64, 0.7)',
+          'rgba(255, 206, 86, 0.7)',
+          'rgba(153, 102, 255, 0.7)',
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(255, 159, 64, 1)',
+          'rgba(255, 206, 86, 1)',
+          'rgba(153, 102, 255, 1)',
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
   useEffect(() => {
-    let s = 0;
     console.log(tokens);
     if (tokens) {
       tokens.length > 0 &&
         tokens.map((token) => {
-          console.log(token);
-          let list = tokenList;
-          s += token.value;
-          if (!list.includes({ id: token.token.symbol })) {
-            let dataSet = {
-              id: token.token.symbol,
-              label: token.token.symbol,
-              value: (Math.round(token.value * 100) / 100).toFixed(2),
-              color: colorRange[Math.floor(Math.random() * colorRange.length)],
-            };
-            list.push(dataSet);
-            setTokenList(list);
-            console.log('Data Set: ***');
-            console.log(list);
+          if (token !== undefined) {
+            setLabels((i) => [...i, token.token.symbol]);
+            setDataSet((i) => [...i, token.value]);
           }
         });
     }
   }, [tokens]);
 
-  return (
+  const pieOptions = {
+    plugins: {
+      legend: {
+        display: false,
+      },
+      datalabels: {
+        display: true,
+        color: 'rgba(255,255,255, 0.9)',
+        clip: true,
+        clamp: true,
+        font: {
+          size: 12,
+        },
+      },
+    },
+    tooltip: {
+      backgroundColor: 'black',
+    },
+  };
+
+  return labels.length > 0 ? (
     <Wrapper>
-      {tokens ? (
-        <ResponsivePie
-          data={tokenList}
-          margin={{ top: 20, right: 40, bottom: 40, left: 40 }}
-          padAngle={0.7}
-          cornerRadius={3}
-          activeOuterRadiusOffset={8}
-          colors={{ datum: `data.color` }}
-          borderWidth={1}
-          borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-          enableArcLinkLabels={false}
-          arcLabel={(d: any) => `${d.id} (${d.value})`}
-          arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor={{ from: 'color', modifiers: [['darker', 2]] }}
-          arcLinkLabelsThickness={2}
-          arcLinkLabelsColor={{ from: 'color', modifiers: [['darker', 2]] }}
-          arcLabelsSkipAngle={10}
-          arcLabelsTextColor="black"
-        />
-      ) : (
-        <P>Enter a wallet address, or sign in.</P>
-      )}
+      <Pie data={data} translate options={pieOptions} />
     </Wrapper>
+  ) : (
+    <P>
+      Enter a wallet address (Or authorize your wallet) to see the total value!
+    </P>
   );
 }
