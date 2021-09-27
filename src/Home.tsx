@@ -185,7 +185,10 @@ export const Home: React.FC = () => {
                 bgColor="transparent"
                 onClick={() => deactivate()}
               >
-                ✅ {account?.substr(0, 6)}...
+                ✅{' '}
+                {`${account?.substring(0, 4)}...${account?.substring(
+                  account.length - 4,
+                )}`}
               </Button>
             ) : (
               <Button
