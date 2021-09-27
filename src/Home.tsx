@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { injected } from './web3';
 import { useWeb3ApiClient } from '@web3api/react';
 import {
   useColorMode,
@@ -26,10 +27,11 @@ import {
 import { coingeckoQuery, covalentQuery, defiSDKQuery } from './queries';
 import { CHAIN_ID, CHAIN_NAME, COINGECKO_API, COVALENT_API } from './config';
 import { useTokenContext } from './utils/context/tokenContext';
+import { useWeb3React } from '@web3-react/core';
 
 export const Home: React.FC = () => {
-  const [accountAddress, setAccountAddress] = React.useState<string>('');
   const [submitted, setSubmitted] = React.useState<boolean>(false);
+  const [connected, setConnected] = React.useState<boolean>(false);
   const [accountBalance, setAccountBalance] = React.useState<
     CovalentAccountBalance | undefined
   >(undefined);
@@ -38,6 +40,10 @@ export const Home: React.FC = () => {
   >();
   const { colorMode, toggleColorMode } = useColorMode();
   const w3Client = useWeb3ApiClient();
+  const { active, activate, account, deactivate } = useWeb3React();
+  const [accountAddress, setAccountAddress] = React.useState<
+    null | string | undefined
+  >(account ? account : null);
 
   const { setTokens } = useTokenContext();
 
@@ -45,27 +51,42 @@ export const Home: React.FC = () => {
     setSubmitted(true);
   };
 
+  // Need help setting account from connected wallet
+  const setConnectHandler = async (): Promise<any> => {
+    setAccountAddress(account);
+    setConnected(true);
+  };
+
+  const fetch = async () => {
+    covalentQuery.variables.url = `${COVALENT_API}/v1/${CHAIN_ID}/address/${accountAddress}/balances_v2/`;
+    const result = await w3Client.query(covalentQuery);
+    if (result && result.data && result.data?.get) {
+      const response: Record<string, string> = result.data.get as Record<
+        string,
+        string
+      >;
+      const covalentResponse = JSON.parse(response['body']) as CovalentResponse;
+      setAccountBalance(covalentResponse.data);
+      console.log(covalentResponse.data);
+    }
+    setSubmitted(false);
+    setConnected(false);
+  };
+  // Sets account address to the metamask injected address if exists.
   useEffect(() => {
-    const fetch = async () => {
-      if (submitted) {
-        covalentQuery.variables.url = `${COVALENT_API}/v1/${CHAIN_ID}/address/${accountAddress}/balances_v2/`;
-        const result = await w3Client.query(covalentQuery);
-        if (result && result.data && result.data?.get) {
-          const response: Record<string, string> = result.data.get as Record<
-            string,
-            string
-          >;
-          const covalentResponse = JSON.parse(
-            response['body'],
-          ) as CovalentResponse;
-          setAccountBalance(covalentResponse.data);
-          console.log(covalentResponse.data);
-        }
-        setSubmitted(false);
-      }
-    };
-    fetch();
-  }, [submitted, accountAddress, w3Client]);
+    if (connected) {
+      setAccountAddress(account);
+      // Trigger below useEffect to call fetch()
+      setSubmitted(true);
+    }
+  }, [connected, account]);
+
+  useEffect(() => {
+    if (submitted) {
+      // Moved to its own function to clean up.
+      fetch();
+    }
+  }, [submitted]);
 
   useEffect(() => {
     async function fetchTokenBalance(
@@ -153,14 +174,44 @@ export const Home: React.FC = () => {
                 w="60%"
                 placeholder="Wallet Address"
                 onChange={(event) => onChangeHandler(event)}
+                value={accountAddress ? accountAddress : ''}
               />
-              <Button mr={5} onClick={logMsgHandler} colorScheme="blue">
+              <Button
+                borderRadius="15px"
+                mr={5}
+                onClick={logMsgHandler}
+                bgColor="transparent"
+              >
                 Submit
               </Button>
             </Flex>
-            <Button onClick={toggleColorMode}>
+            <Button mr={5} onClick={toggleColorMode}>
               {colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
             </Button>
+            {active ? (
+              <Button
+                borderRadius="15px"
+                bgColor="transparent"
+                onClick={() => deactivate()}
+              >
+                ✅{' '}
+                {`${account?.substring(0, 4)}...${account?.substring(
+                  account.length - 4,
+                )}`}
+              </Button>
+            ) : (
+              <Button
+                fontSize="inherit"
+                borderRadius="15px"
+                onClick={() => {
+                  activate(injected, undefined, true)
+                    .then(setConnectHandler)
+                    .catch((e) => console.log(e));
+                }}
+              >
+                Connect
+              </Button>
+            )}
           </Flex>
           <Flex justify="flex-start" maxW="100%">
             <PieChart />
@@ -169,7 +220,7 @@ export const Home: React.FC = () => {
         <br />
 
         <Flex justify="flex-start">
-          <Table maxW="80%" variant="simple">
+          <Table variant="striped">
             <Thead>
               <Tr>
                 <Th>Token</Th>
@@ -183,9 +234,9 @@ export const Home: React.FC = () => {
                 tokenBalances.map((token: TokenBalance, i) => (
                   <Tr key={i}>
                     <Td> {token.token.symbol} </Td>
-                    <Td>{token.amount.toFixed(4)}</Td>
-                    <Td>{token.price.toFixed(4)}</Td>
-                    <Td>{token.value.toFixed(4)}</Td>
+                    <Td>{token.amount.toLocaleString()}</Td>
+                    <Td>{token.price.toLocaleString()}</Td>
+                    <Td>{token.value.toLocaleString()}</Td>
                   </Tr>
                 ))}
             </Tbody>

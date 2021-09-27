@@ -70,7 +70,7 @@ export default function PieChart() {
 
   return labels.length > 0 ? (
     <Wrapper>
-      <Pie data={data} translate options={pieOptions} />
+      <Pie data={data} translate={''} options={pieOptions} />
     </Wrapper>
   ) : (
     <P>
