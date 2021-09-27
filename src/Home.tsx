@@ -30,9 +30,6 @@ import { useTokenContext } from './utils/context/tokenContext';
 import { useWeb3React } from '@web3-react/core';
 
 export const Home: React.FC = () => {
-  const [accountAddress, setAccountAddress] = React.useState<
-    null | string | undefined
-  >('');
   const [submitted, setSubmitted] = React.useState<boolean>(false);
   const [connected, setConnected] = React.useState<boolean>(false);
   const [accountBalance, setAccountBalance] = React.useState<
@@ -44,6 +41,9 @@ export const Home: React.FC = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const w3Client = useWeb3ApiClient();
   const { active, activate, account, deactivate } = useWeb3React();
+  const [accountAddress, setAccountAddress] = React.useState<
+    null | string | undefined
+  >(account ? account : null);
 
   const { setTokens } = useTokenContext();
 
@@ -57,28 +57,36 @@ export const Home: React.FC = () => {
     setConnected(true);
   };
 
+  const fetch = async () => {
+    covalentQuery.variables.url = `${COVALENT_API}/v1/${CHAIN_ID}/address/${accountAddress}/balances_v2/`;
+    const result = await w3Client.query(covalentQuery);
+    if (result && result.data && result.data?.get) {
+      const response: Record<string, string> = result.data.get as Record<
+        string,
+        string
+      >;
+      const covalentResponse = JSON.parse(response['body']) as CovalentResponse;
+      setAccountBalance(covalentResponse.data);
+      console.log(covalentResponse.data);
+    }
+    setSubmitted(false);
+    setConnected(false);
+  };
+  // Sets account address to the metamask injected address if exists.
   useEffect(() => {
-    const fetch = async () => {
-      if (submitted || connected) {
-        covalentQuery.variables.url = `${COVALENT_API}/v1/${CHAIN_ID}/address/${accountAddress}/balances_v2/`;
-        const result = await w3Client.query(covalentQuery);
-        if (result && result.data && result.data?.get) {
-          const response: Record<string, string> = result.data.get as Record<
-            string,
-            string
-          >;
-          const covalentResponse = JSON.parse(
-            response['body'],
-          ) as CovalentResponse;
-          setAccountBalance(covalentResponse.data);
-          console.log(covalentResponse.data);
-        }
-        setSubmitted(false);
-        setConnected(false);
-      }
-    };
-    fetch();
-  }, [submitted, connected, accountAddress]);
+    if (connected) {
+      setAccountAddress(account);
+      // Trigger below useEffect to call fetch()
+      setSubmitted(true);
+    }
+  }, [connected, account]);
+
+  useEffect(() => {
+    if (submitted) {
+      // Moved to its own function to clean up.
+      fetch();
+    }
+  }, [submitted]);
 
   useEffect(() => {
     async function fetchTokenBalance(
@@ -166,6 +174,7 @@ export const Home: React.FC = () => {
                 w="60%"
                 placeholder="Wallet Address"
                 onChange={(event) => onChangeHandler(event)}
+                value={accountAddress ? accountAddress : ''}
               />
               <Button
                 borderRadius="15px"
