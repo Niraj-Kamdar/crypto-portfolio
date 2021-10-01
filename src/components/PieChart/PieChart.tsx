@@ -42,7 +42,7 @@ export default function PieChart() {
         tokens.map((token) => {
           if (token !== undefined) {
             setLabels((i) => [...i, token.token.symbol]);
-            setDataSet((i) => [...i, token.value]);
+            setDataSet((i) => [...i, Math.round(token.value * 100) / 100]);
           }
         });
     }
@@ -54,7 +54,7 @@ export default function PieChart() {
         display: false,
       },
       datalabels: {
-        display: true,
+        display: 'auto',
         color: 'rgba(255,255,255, 0.9)',
         clip: true,
         clamp: true,
