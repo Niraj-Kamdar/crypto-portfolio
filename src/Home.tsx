@@ -135,7 +135,6 @@ export const Home: React.FC = () => {
                 price: usdPrice,
                 value: amount * usdPrice,
               };
-              console.log(tokenBalance);
               return tokenBalance;
             }
           }
