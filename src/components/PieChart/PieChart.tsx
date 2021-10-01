@@ -36,7 +36,7 @@ export default function PieChart() {
   };
 
   useEffect(() => {
-    console.log(tokens);
+    setDataSet([]);
     if (tokens) {
       tokens.length > 0 &&
         tokens.map((token) => {
