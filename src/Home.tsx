@@ -105,52 +105,60 @@ export const Home: React.FC = () => {
         if (result.data?.getComponents) {
           const getComponents = result.data.getComponents;
           if (getComponents.underlyingTokenComponents.length !== 0) {
-            for (let underlyingTC of getComponents.underlyingTokenComponents) {
-              coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${underlyingTC.token.address}`;
-              const cgResult: any = await w3Client.query(coingeckoQuery);
-              if (cgResult && cgResult.data && cgResult.data?.get) {
-                const response: Record<string, string> = cgResult.data
-                  .get as Record<string, string>;
-                const parsed = JSON.parse(response['body']) as Record<
-                  string,
-                  unknown
-                >;
-                const marketData = parsed['market_data'] as Record<
-                  string,
-                  unknown
-                >;
-                const currentPrice = marketData['current_price'] as Record<
-                  string,
-                  number
-                >;
-                let usdPrice = currentPrice['usd'];
+            await Promise.all(
+              getComponents.underlyingTokenComponents.map(
+                async (underlyingTC: any) => {
+                  coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${underlyingTC.token.address}`;
+                  const cgResult: any = await w3Client.query(coingeckoQuery);
+                  if (cgResult && cgResult.data && cgResult.data?.get) {
+                    const response: Record<string, string> = cgResult.data
+                      .get as Record<string, string>;
+                    const parsed = JSON.parse(response['body']) as Record<
+                      string,
+                      unknown
+                    >;
+                    const marketData = parsed['market_data'] as Record<
+                      string,
+                      unknown
+                    >;
+                    const currentPrice = marketData['current_price'] as Record<
+                      string,
+                      number
+                    >;
+                    let usdPrice = currentPrice['usd'];
 
-                usdPrice = usdPrice;
-                //Virtual balance = covalenttoken balance x rate of the underlying tc
-                let virtualBalance =
-                  covalentTokenBalance.balance /
-                  10 ** covalentTokenBalance.contract_decimals;
-                virtualBalance = virtualBalance * parseFloat(underlyingTC.rate);
+                    usdPrice = usdPrice;
+                    //Virtual balance = covalenttoken balance x rate of the underlying tc
+                    let virtualBalance =
+                      covalentTokenBalance.balance /
+                      10 ** covalentTokenBalance.contract_decimals;
+                    virtualBalance =
+                      virtualBalance * parseFloat(underlyingTC.rate);
 
-                // Virtual value = virtual balance x usd price (derived form coingecko), converting to real number
-                let virtualValue = virtualBalance * usdPrice;
-                virtualValue = parseFloat(virtualValue.toFixed(2));
+                    // Virtual value = virtual balance x usd price (derived form coingecko), converting to real number
+                    let virtualValue = virtualBalance * usdPrice;
+                    virtualValue = parseFloat(virtualValue.toFixed(2));
 
-                // place values in TokenBalance object and push into array for return
-                const found = underlyingTokens!.some(function (el: any) {
-                  return el.token.symbol === underlyingTC.token.symbol;
-                });
-                if (!found && virtualValue > 0) {
-                  const tokenBalance: TokenBalance = {
-                    token: underlyingTC.token,
-                    amount: virtualBalance,
-                    price: usdPrice,
-                    value: virtualValue,
-                  };
-                  setUnderlyingTokens((prev: any) => [...prev, tokenBalance]);
-                }
-              }
-            }
+                    // place values in TokenBalance object and push into array for return
+                    const found = underlyingTokens!.some(function (el: any) {
+                      return el.token.symbol === underlyingTC.token.symbol;
+                    });
+                    if (!found && virtualValue > 0) {
+                      const tokenBalance: TokenBalance = {
+                        token: underlyingTC.token,
+                        amount: virtualBalance,
+                        price: usdPrice,
+                        value: virtualValue,
+                      };
+                      setUnderlyingTokens((prev: any) => [
+                        ...prev,
+                        tokenBalance,
+                      ]);
+                    }
+                  }
+                },
+              ),
+            );
           } else {
             coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${getComponents.token.address}`;
             const cgResult = await w3Client.query(coingeckoQuery);
