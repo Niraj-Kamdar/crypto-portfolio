@@ -44,9 +44,8 @@ export const Home: React.FC = () => {
   const [accountAddress, setAccountAddress] = React.useState<
     null | string | undefined
   >(account ? account : null);
-  const [underlyingTokens, setUnderlyingTokens] = React.useState<
-    TokenBalance[] | undefined
-  >([]);
+  const [underlyingTokens, setUnderlyingTokens] = React.useState<any>([]);
+  const [underlyingTokensObj, setUnderlyingTokensObj] = React.useState<any>({});
 
   const { setTokens } = useTokenContext();
 
@@ -150,10 +149,22 @@ export const Home: React.FC = () => {
                         price: usdPrice,
                         value: virtualValue,
                       };
-                      setUnderlyingTokens((prev: any) => [
-                        ...prev,
-                        tokenBalance,
-                      ]);
+                      let data = underlyingTokensObj;
+                      if (!data[`${getComponents.token.symbol}`]) {
+                        const newData = {
+                          [getComponents.token.symbol]: [tokenBalance],
+                        };
+                        setUnderlyingTokensObj({ ...data, ...newData });
+                      } else {
+                        let arr =
+                          underlyingTokensObj[`${getComponents.token.symbol}`];
+                        arr.push(tokenBalance);
+                        let newData = { [getComponents.token.symbol]: arr };
+                        setUnderlyingTokens({
+                          ...underlyingTokensObj,
+                          ...newData,
+                        });
+                      }
                     }
                   }
                 },
@@ -193,7 +204,6 @@ export const Home: React.FC = () => {
         }
       }
     }
-
     const fetch = async () => {
       if (accountBalance?.items) {
         const promises = accountBalance.items.map(fetchTokenBalance);
@@ -223,15 +233,15 @@ export const Home: React.FC = () => {
       </Tr>
     ));
 
-  const renderSecondary = () =>
-    underlyingTokens!.map((token, i) => (
-      <Tr key={i}>
-        <Td>{token.token.symbol}</Td>
-        <Td>{token.amount.toLocaleString()}</Td>
-        <Td>{token.price.toLocaleString()}</Td>
-        <Td>{token.value.toLocaleString()}</Td>
-      </Tr>
-    ));
+  // const renderSecondary = () =>
+  //   underlyingTokens!.map((token: any, i: number) => (
+  //     <Tr key={i}>
+  //       <Td>{token.token.symbol}</Td>
+  //       <Td>{token.amount.toLocaleString()}</Td>
+  //       <Td>{token.price.toLocaleString()}</Td>
+  //       <Td>{token.value.toLocaleString()}</Td>
+  //     </Tr>
+  //   ));
 
   return (
     <>
@@ -302,7 +312,8 @@ export const Home: React.FC = () => {
             </Thead>
             <Tbody>
               {renderTable()}
-              {renderSecondary()}
+              {console.log(underlyingTokensObj)}
+              {/* {renderSecondary()} */}
             </Tbody>
           </Table>
         </Flex>
