@@ -44,6 +44,14 @@ export interface Token {
   totalSupply: string;
 }
 
+export interface UnderlyingToken {
+  address: string;
+  name: string;
+  symbol: string;
+  decimals: number;
+  totalSupply: string;
+}
+
 export interface TokenComponentsList {
   token: Token;
   type: TokenProtocolType;
@@ -88,10 +96,22 @@ export interface DefiSDKResponse {
   errors: string[] | undefined;
 }
 
+export interface UnderlyingTokenBalance {
+  token: UnderlyingToken;
+  amount: number;
+  price: number;
+  value: number;
+}
+
 export interface TokenBalance {
   token: Token;
   amount: number;
   price: number;
   value: number;
   percentOfTotal?: number;
+}
+
+export interface Protocol {
+  protocol: string;
+  underlyingTokenBalance: UnderlyingTokenBalance[];
 }

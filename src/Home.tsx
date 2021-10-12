@@ -22,12 +22,15 @@ import {
   CovalentResponse,
   CovalentTokenBalance,
   DefiSDKResponse,
+  Protocol,
   TokenBalance,
+  UnderlyingTokenBalance,
 } from './interfaces';
 import { coingeckoQuery, covalentQuery, defiSDKQuery } from './queries';
 import { CHAIN_ID, CHAIN_NAME, COINGECKO_API, COVALENT_API } from './config';
 import { useTokenContext } from './utils/context/tokenContext';
 import { useWeb3React } from '@web3-react/core';
+import _ from 'lodash';
 
 export const Home: React.FC = () => {
   const [submitted, setSubmitted] = React.useState<boolean>(false);
@@ -44,6 +47,7 @@ export const Home: React.FC = () => {
   const [accountAddress, setAccountAddress] = React.useState<
     null | string | undefined
   >(account ? account : null);
+  const [underlyingTokens, setUnderlyingTokens] = React.useState<any>({});
 
   const { setTokens } = useTokenContext();
 
@@ -102,11 +106,67 @@ export const Home: React.FC = () => {
         if (result.data?.getComponents) {
           const getComponents = result.data.getComponents;
           if (getComponents.underlyingTokenComponents.length !== 0) {
-            for (let underlyingTC of getComponents.underlyingTokenComponents) {
-              coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${underlyingTC.token.address}`;
-              const cgResult = await w3Client.query(coingeckoQuery);
-              console.log(cgResult);
-            }
+            let obj = { [getComponents.token.name]: [] };
+            await Promise.all(
+              getComponents.underlyingTokenComponents.map(
+                async (underlyingTC: any) => {
+                  coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${underlyingTC.token.address}`;
+                  const cgResult: any = await w3Client.query(coingeckoQuery);
+                  if (cgResult && cgResult.data && cgResult.data?.get) {
+                    const response: Record<string, string> = cgResult.data
+                      .get as Record<string, string>;
+                    const parsed = JSON.parse(response['body']) as Record<
+                      string,
+                      unknown
+                    >;
+                    const marketData = parsed['market_data'] as Record<
+                      string,
+                      unknown
+                    >;
+                    const currentPrice = marketData['current_price'] as Record<
+                      string,
+                      number
+                    >;
+                    let usdPrice = currentPrice['usd'];
+                    //Virtual balance = covalenttoken balance x rate of the underlying tc
+                    let virtualBalance =
+                      covalentTokenBalance.balance /
+                      10 ** covalentTokenBalance.contract_decimals;
+                    virtualBalance =
+                      virtualBalance * parseFloat(underlyingTC.rate);
+
+                    // Virtual value = virtual balance x usd price (derived form coingecko), converting to real number
+                    let virtualValue = virtualBalance * usdPrice;
+                    virtualValue = parseFloat(virtualValue.toFixed(2));
+                    const underlyingBalance: UnderlyingTokenBalance = {
+                      token: underlyingTC.token,
+                      amount: virtualBalance,
+                      price: usdPrice,
+                      value: virtualValue,
+                    };
+                    let stateObj = underlyingTokens;
+                    let protocolName = getComponents.token.name;
+                    if (stateObj.hasOwnProperty(protocolName)) {
+                      console.log('Object exists');
+                      console.log(stateObj[protocolName]);
+                      let balanceArray =
+                        stateObj[protocolName].underlyingBalance;
+                      balanceArray.push(underlyingBalance);
+                      stateObj[protocolName] = {
+                        underlyingBalance: balanceArray,
+                      };
+                      setUnderlyingTokens(stateObj);
+                    } else {
+                      console.log('Need to make object');
+                      stateObj[protocolName] = {
+                        underlyingBalance: [underlyingBalance],
+                      };
+                      setUnderlyingTokens(stateObj);
+                    }
+                  }
+                },
+              ),
+            );
           } else {
             coingeckoQuery.variables.url = `${COINGECKO_API}/coins/${CHAIN_NAME}/contract/${getComponents.token.address}`;
             const cgResult = await w3Client.query(coingeckoQuery);
@@ -141,7 +201,6 @@ export const Home: React.FC = () => {
         }
       }
     }
-
     const fetch = async () => {
       if (accountBalance?.items) {
         const promises = accountBalance.items.map(fetchTokenBalance);
@@ -160,6 +219,26 @@ export const Home: React.FC = () => {
   const onChangeHandler = (event: any): void => {
     setAccountAddress(event?.target.value);
   };
+
+  const renderTable = () =>
+    tokenBalances?.map((token: TokenBalance, i) => (
+      <Tr key={i}>
+        <Td> {token.token.symbol} </Td>
+        <Td>{token.amount.toLocaleString()}</Td>
+        <Td>{token.price.toLocaleString()}</Td>
+        <Td>{token.value.toLocaleString()}</Td>
+      </Tr>
+    ));
+
+  // const renderSecondary = () =>
+  //   underlyingTokens!.map((token: any, i: number) => (
+  //     <Tr key={i}>
+  //       <Td>{token.token.symbol}</Td>
+  //       <Td>{token.amount.toLocaleString()}</Td>
+  //       <Td>{token.price.toLocaleString()}</Td>
+  //       <Td>{token.value.toLocaleString()}</Td>
+  //     </Tr>
+  //   ));
 
   return (
     <>
@@ -229,15 +308,9 @@ export const Home: React.FC = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {tokenBalances &&
-                tokenBalances.map((token: TokenBalance, i) => (
-                  <Tr key={i}>
-                    <Td> {token.token.symbol} </Td>
-                    <Td>{token.amount.toLocaleString()}</Td>
-                    <Td>{token.price.toLocaleString()}</Td>
-                    <Td>{token.value.toLocaleString()}</Td>
-                  </Tr>
-                ))}
+              {renderTable()}
+              {console.log(underlyingTokens)}
+              {/* {renderSecondary()} */}
             </Tbody>
           </Table>
         </Flex>
