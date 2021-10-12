@@ -22,12 +22,15 @@ import {
   CovalentResponse,
   CovalentTokenBalance,
   DefiSDKResponse,
+  Protocol,
   TokenBalance,
+  UnderlyingTokenBalance,
 } from './interfaces';
 import { coingeckoQuery, covalentQuery, defiSDKQuery } from './queries';
 import { CHAIN_ID, CHAIN_NAME, COINGECKO_API, COVALENT_API } from './config';
 import { useTokenContext } from './utils/context/tokenContext';
 import { useWeb3React } from '@web3-react/core';
+import _ from 'lodash';
 
 export const Home: React.FC = () => {
   const [submitted, setSubmitted] = React.useState<boolean>(false);
@@ -44,8 +47,7 @@ export const Home: React.FC = () => {
   const [accountAddress, setAccountAddress] = React.useState<
     null | string | undefined
   >(account ? account : null);
-  const [underlyingTokens, setUnderlyingTokens] = React.useState<any>([]);
-  const [underlyingTokensObj, setUnderlyingTokensObj] = React.useState<any>({});
+  const [underlyingTokens, setUnderlyingTokens] = React.useState<any>({});
 
   const { setTokens } = useTokenContext();
 
@@ -104,6 +106,7 @@ export const Home: React.FC = () => {
         if (result.data?.getComponents) {
           const getComponents = result.data.getComponents;
           if (getComponents.underlyingTokenComponents.length !== 0) {
+            let obj = { [getComponents.token.name]: [] };
             await Promise.all(
               getComponents.underlyingTokenComponents.map(
                 async (underlyingTC: any) => {
@@ -125,8 +128,6 @@ export const Home: React.FC = () => {
                       number
                     >;
                     let usdPrice = currentPrice['usd'];
-
-                    usdPrice = usdPrice;
                     //Virtual balance = covalenttoken balance x rate of the underlying tc
                     let virtualBalance =
                       covalentTokenBalance.balance /
@@ -137,34 +138,30 @@ export const Home: React.FC = () => {
                     // Virtual value = virtual balance x usd price (derived form coingecko), converting to real number
                     let virtualValue = virtualBalance * usdPrice;
                     virtualValue = parseFloat(virtualValue.toFixed(2));
-
-                    // place values in TokenBalance object and push into array for return
-                    const found = underlyingTokens!.some(function (el: any) {
-                      return el.token.symbol === underlyingTC.token.symbol;
-                    });
-                    if (!found && virtualValue > 0) {
-                      const tokenBalance: TokenBalance = {
-                        token: underlyingTC.token,
-                        amount: virtualBalance,
-                        price: usdPrice,
-                        value: virtualValue,
+                    const underlyingBalance: UnderlyingTokenBalance = {
+                      token: underlyingTC.token,
+                      amount: virtualBalance,
+                      price: usdPrice,
+                      value: virtualValue,
+                    };
+                    let stateObj = underlyingTokens;
+                    let protocolName = getComponents.token.name;
+                    if (stateObj.hasOwnProperty(protocolName)) {
+                      console.log('Object exists');
+                      console.log(stateObj[protocolName]);
+                      let balanceArray =
+                        stateObj[protocolName].underlyingBalance;
+                      balanceArray.push(underlyingBalance);
+                      stateObj[protocolName] = {
+                        underlyingBalance: balanceArray,
                       };
-                      let data = underlyingTokensObj;
-                      if (!data[`${getComponents.token.symbol}`]) {
-                        const newData = {
-                          [getComponents.token.symbol]: [tokenBalance],
-                        };
-                        setUnderlyingTokensObj({ ...data, ...newData });
-                      } else {
-                        let arr =
-                          underlyingTokensObj[`${getComponents.token.symbol}`];
-                        arr.push(tokenBalance);
-                        let newData = { [getComponents.token.symbol]: arr };
-                        setUnderlyingTokens({
-                          ...underlyingTokensObj,
-                          ...newData,
-                        });
-                      }
+                      setUnderlyingTokens(stateObj);
+                    } else {
+                      console.log('Need to make object');
+                      stateObj[protocolName] = {
+                        underlyingBalance: [underlyingBalance],
+                      };
+                      setUnderlyingTokens(stateObj);
                     }
                   }
                 },
@@ -312,7 +309,7 @@ export const Home: React.FC = () => {
             </Thead>
             <Tbody>
               {renderTable()}
-              {console.log(underlyingTokensObj)}
+              {console.log(underlyingTokens)}
               {/* {renderSecondary()} */}
             </Tbody>
           </Table>
